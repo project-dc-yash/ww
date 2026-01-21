@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Detection Logs | Sugarcane Project</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --danger: #ff3131;
+            --warning: #ffcc00;
+            --bg: #0a0a0a;
+            --panel: #1a1a1a;
+            --text-gray: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: white; display: flex; height: 100vh; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 260px; background: #111; border-right: 1px solid #333; padding: 25px; display: flex; flex-direction: column; }
+        .sidebar h2 { color: var(--primary); font-size: 20px; margin-bottom: 30px; }
+        .menu-item { padding: 12px 15px; color: var(--text-gray); text-decoration: none; display: flex; align-items: center; gap: 10px; border-radius: 8px; transition: 0.3s; margin-bottom: 5px; }
+        .menu-item:hover, .menu-item.active { background: rgba(0, 255, 65, 0.1); color: var(--primary); }
+
+        /* --- MAIN CONTENT --- */
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* --- FILTERS --- */
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; }
+        .filter-btn { background: var(--panel); border: 1px solid #333; color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .filter-btn.active { background: var(--primary); color: black; border-color: var(--primary); font-weight: bold; }
+
+        /* --- LOGS TABLE --- */
+        .log-table-container { background: var(--panel); border-radius: 12px; border: 1px solid #333; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 18px; background: rgba(255,255,255,0.03); color: var(--text-gray); font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #333; }
+        td { padding: 15px 18px; border-bottom: 1px solid #222; font-size: 14px; vertical-align: middle; }
+        
+        .img-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #444; }
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .status-danger { background: rgba(255, 49, 49, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .status-success { background: rgba(0, 255, 65, 0.1); color: var(--primary); border: 1px solid var(--primary); }
+        .status-warning { background: rgba(255, 204, 0, 0.1); color: var(--warning); border: 1px solid var(--warning); }
+
+        .btn-view { background: transparent; border: 1px solid #444; color: white; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-view:hover { background: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>SUGAR-AI</h2>
+        <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Home</a>
+        <a href="scan.html" class="menu-item"><i class="fas fa-search"></i> Live Scan</a>
+        <a href="logs.html" class="menu-item active"><i class="fas fa-history"></i> Detection Logs</a>
+        <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i> Analytics</a>
+        <a href="#" class="menu-item" style="margin-top: auto;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main">
+        <div class="header-row">
+            <h1>Detection Logs</h1>
+            <button class="filter-btn" style="background: var(--primary); color: black;" onclick="window.print()"><i class="fas fa-file-export"></i> Print PDF</button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterLogs('all', this)">All Logs</button>
+            <button class="filter-btn" onclick="filterLogs('Metal', this)">Metal Only</button>
+            <button class="filter-btn" onclick="filterLogs('Disease', this)">Disease Only</button>
+        </div>
+
+        <div class="log-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Timestamp</th>
+                        <th>Batch ID</th>
+                        <th>Scan Mode</th>
+                        <th>Result</th>
+                        <th>Confidence</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="logBody">
+                    <tr data-type="Metal">
+                        <td><img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=100" class="img-thumb"></td>
+                        <td>2026-01-20 22:40:12</td>
+                        <td>#B-9812</td>
+                        <td>Metal</td>
+                        <td><span class="status-badge status-danger">Metal Detected</span></td>
+                        <td>98.4%</td>
+                        <td><button class="btn-view" onclick="alert('Viewing Details for Batch #B-9812')">View Report</button></td>
+                    </tr>
+                    <tr data-type="Disease">
+                        <td><img src="https://images.unsplash.com/photo-1512428559083-a401932145b5?w=100" class="img-thumb"></td>
+                        <td>2026-01-20 22:35:05</td>
+                        <td>#B-9811</td>
+                        <td>Disease</td>
+                        <td><span class="status-badge status-success">Healthy Leaf</span></td>
+                        <td>99.2%</td>
+                        <td><button class="btn-view">View Report</button></td>
+                    </tr>
+                    <tr data-type="Disease">
+                        <td><img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=100" class="img-thumb"></td>
+                        <td>2026-01-20 21:50:44</td>
+                        <td>#B-9810</td>
+                        <td>Disease</td>
+                        <td><span class="status-badge status-warning">Rust Detected</span></td>
+                        <td>87.6%</td>
+                        <td><button class="btn-view">View Report</button></td>
+                    </tr>
+                    <tr data-type="Metal">
+                        <td><img src="https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=100" class="img-thumb"></td>
+                        <td>2026-01-20 21:12:30</td>
+                        <td>#B-9809</td>
+                        <td>Metal</td>
+                        <td><span class="status-badge status-success">Clear</span></td>
+                        <td>99.9%</td>
+                        <td><button class="btn-view">View Report</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterLogs(type, btn) {
+            // 1. Remove active class from all buttons and add to clicked button
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // 2. Filter rows
+            const rows = document.querySelectorAll('#logBody tr');
+            rows.forEach(row => {
+                const rowType = row.getAttribute('data-type');
+                if (type === 'all' || rowType === type) {
+                    row.style.display = ""; // Show row
+                } else {
+                    row.style.display = "none"; // Hide row
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugarcane AI | Final Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --danger: #ff3131;
+            --warning: #ffcc00;
+            --bg: #0a0a0a;
+            --panel: #161b22;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+        /* HEADER */
+        header { background: #111; padding: 20px 40px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .logo { color: var(--primary); font-size: 24px; font-weight: bold; }
+
+        /* CONTAINER */
+        .container { padding: 30px 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* PROJECT INFO SECTION */
+        .project-info { background: var(--panel); padding: 20px; border-radius: 8px; border-left: 5px solid var(--primary); margin-bottom: 30px; line-height: 1.6; }
+        .project-info h2 { color: var(--primary); margin-bottom: 10px; font-size: 18px; }
+
+        /* STATS */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: var(--panel); padding: 20px; border-radius: 10px; border: 1px solid #333; text-align: center; }
+        .card .val { font-size: 28px; font-weight: bold; color: var(--primary); margin: 10px 0; }
+        .card .label { color: #8b949e; font-size: 14px; text-transform: uppercase; }
+
+        /* GRAPHS */
+        .graph-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .graph-box { background: var(--panel); padding: 20px; border-radius: 10px; border: 1px solid #333; height: 300px; }
+
+        /* DATA TABLE */
+        .table-box { background: var(--panel); border-radius: 10px; border: 1px solid #333; overflow: hidden; margin-bottom: 50px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #21262d; padding: 15px; text-align: left; color: #8b949e; font-size: 13px; }
+        td { padding: 15px; border-top: 1px solid #30363d; font-size: 14px; }
+        .status { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .status-red { background: rgba(255,49,49,0.2); color: var(--danger); }
+        .status-green { background: rgba(0,255,65,0.2); color: var(--primary); }
+
+        .btn-print { background: var(--primary); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        @media print {
+            .btn-print { display: none; }
+            body { background: white; color: black; }
+            .card, .graph-box, .table-box, .project-info { border: 1px solid #ddd; background: white; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">SUGAR-AI ANALYTICS</div>
+        <button class="btn-print" onclick="window.print()">DOWNLOAD REPORT (PDF)</button>
+    </header>
+
+    <div class="container">
+        <div class="project-info">
+            <h2>SYSTEM CONFIGURATION & DATA LOG</h2>
+            <p><b>Objective:</b> Automated detection of metallic impurities and leaf diseases in sugarcane pre-crushing stages.</p>
+            <p><b>Hardware:</b> Top-mounted 4K Camera at 1.5m height with uniform LED illumination.</p>
+            <p><b>Dataset:</b> 5,000+ labeled images including Iron, Copper, Red Rot, and Sugarcane Rust samples.</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="card"><div class="label">Total Scanned</div><div class="val">2,450</div></div>
+            <div class="card"><div class="label">Metal Found</div><div class="val" style="color:var(--danger)">18</div></div>
+            <div class="card"><div class="label">Disease Alerts</div><div class="val" style="color:var(--warning)">112</div></div>
+            <div class="card"><div class="label">Health Score</div><div class="val">94.8%</div></div>
+        </div>
+
+        <div class="graph-section">
+            <div class="graph-box"><canvas id="pieChart"></canvas></div>
+            <div class="graph-box"><canvas id="barChart"></canvas></div>
+        </div>
+
+        <div class="table-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>TIME</th>
+                        <th>BATCH ID</th>
+                        <th>TYPE</th>
+                        <th>FINDING</th>
+                        <th>CONFIDENCE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>10:45 AM</td><td>#SGN-201</td><td>Metal</td><td><span class="status status-red">IRON NAIL</span></td><td>98%</td></tr>
+                    <tr><td>11:20 AM</td><td>#SGN-202</td><td>Leaf</td><td><span class="status status-green">HEALTHY</span></td><td>99%</td></tr>
+                    <tr><td>12:05 PM</td><td>#SGN-203</td><td>Leaf</td><td><span class="status status-red">RED ROT</span></td><td>87%</td></tr>
+                    <tr><td>01:15 PM</td><td>#SGN-204</td><td>Metal</td><td><span class="status status-green">CLEAR</span></td><td>99%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Disease Pie Chart
+        new Chart(document.getElementById('pieChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Healthy', 'Red Rot', 'Rust', 'Other'],
+                datasets: [{
+                    data: [80, 10, 7, 3],
+                    backgroundColor: ['#00ff41', '#ff3131', '#ffcc00', '#007bff']
+                }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+        });
+
+        // Weekly Bar Chart
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                datasets: [{
+                    label: 'Detections',
+                    data: [12, 19, 3, 5, 2],
+                    backgroundColor: '#00ff41'
+                }]
+            },
+            options: { maintainAspectRatio: false, scales: { y: { ticks: { color: '#fff' } }, x: { ticks: { color: '#fff' } } } }
+        });
+    </script>
+</body>
+</html>
